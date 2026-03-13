@@ -1,39 +1,57 @@
-const orders = [
-  {
-    name: "김철수",
-    phone: "010-1111",
-    time: "18:00",
-    items: [
-      {menu:"후라이드 치킨", qty:2},
-      {menu:"콜라", qty:1}
-    ],
-    notes: "배달 / 카드결제"
-  },
-  {
-    name: "박영희",
-    phone: "010-2222",
-    time: "19:00",
-    items: [
-      {menu:"양념 치킨", qty:1}
-    ],
-    notes: "포장"
+function showManual(){
+
+  const box = document.getElementById("manualBox")
+
+  if(box.style.display==="none"){
+    box.style.display="block"
+  }else{
+    box.style.display="none"
   }
-]
+}
 
-const container = document.getElementById("orders")
+async function transcribeAudio(){
 
-orders.forEach(order => {
+  const file = document.getElementById("audioFile").files[0]
 
-  let items = order.items
-    .map(i => `${i.menu} x${i.qty}`)
-    .join("<br>")
+  if(!file){
+    alert("파일 선택하세요")
+    return
+  }
 
-  container.innerHTML += `
-    <div class="order">
-      <h3>${order.time}</h3>
-      <p>${order.name} ${order.phone}</p>
-      <p>${items}</p>
-      <p>${order.notes}</p>
-    </div>
-  `
-})
+  const formData = new FormData()
+  formData.append("audio", file)
+
+  const res = await fetch("/transcribe",{
+    method:"POST",
+    body:formData
+  })
+
+  const data = await res.json()
+
+  document.getElementById("result").textContent =
+    JSON.stringify(data,null,2)
+}
+
+async function sendManual(){
+
+  const text = document.getElementById("manualText").value
+
+  if(!text){
+    alert("텍스트 입력")
+    return
+  }
+
+  const res = await fetch("/parse-order",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({text})
+  })
+
+  const data = await res.json()
+
+  document.getElementById("result").textContent =
+    JSON.stringify(data,null,2)
+}
+
