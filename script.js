@@ -1,57 +1,57 @@
-function showManual(){
+let orders = JSON.parse(localStorage.getItem("orders") || "{}")
 
-  const box = document.getElementById("manualBox")
+function saveOrder(){
 
-  if(box.style.display==="none"){
-    box.style.display="block"
-  }else{
-    box.style.display="none"
-  }
+ const text = document.getElementById("inputText").value
+
+ if(!text){
+  alert("주문 입력")
+  return
+ }
+
+ const today = new Date().toISOString().split("T")[0]
+
+ if(!orders[today]){
+  orders[today] = []
+ }
+
+ orders[today].push({
+  time:new Date().toLocaleTimeString(),
+  text:text
+ })
+
+ localStorage.setItem("orders", JSON.stringify(orders))
+
+ document.getElementById("inputText").value=""
+
+ alert("주문 저장됨")
 }
+function loadOrders(){
 
-async function transcribeAudio(){
+ const date = document.getElementById("datePicker").value
 
-  const file = document.getElementById("audioFile").files[0]
+ const title = new Date(date)
 
-  if(!file){
-    alert("파일 선택하세요")
-    return
-  }
+ const weekday = ["일","월","화","수","목","금","토"]
 
-  const formData = new FormData()
-  formData.append("audio", file)
+ const text =
+  `${title.getMonth()+1}월 ${title.getDate()}일 ${weekday[title.getDay()]}요일 주문`
 
-  const res = await fetch("/transcribe",{
-    method:"POST",
-    body:formData
-  })
+ document.getElementById("orderTitle").innerText = text
 
-  const data = await res.json()
+ const container = document.getElementById("orders")
 
-  document.getElementById("result").textContent =
-    JSON.stringify(data,null,2)
+ container.innerHTML=""
+
+ const list = orders[date] || []
+
+ list.forEach(o=>{
+
+  container.innerHTML += `
+   <div class="order">
+     <b>${o.time}</b><br>
+     ${o.text}
+   </div>
+  `
+ })
 }
-
-async function sendManual(){
-
-  const text = document.getElementById("manualText").value
-
-  if(!text){
-    alert("텍스트 입력")
-    return
-  }
-
-  const res = await fetch("/parse-order",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({text})
-  })
-
-  const data = await res.json()
-
-  document.getElementById("result").textContent =
-    JSON.stringify(data,null,2)
-}
-
