@@ -9,7 +9,7 @@ async function parseOrder(){
   return
  }
 
- const apiKey = "여기에_API_KEY"
+ const apiKey = "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"
 
  const menuList = `
 메뉴 목록:
